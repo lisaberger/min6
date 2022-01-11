@@ -9,7 +9,7 @@ body
 {
     overflow: hidden;
     /*background-color:rgb(19, 74, 110)*/
-    background-color:rgb(0, 0, 0)
+    background-color:rgb(15, 15, 15)
 
 }
 
@@ -20,3 +20,24 @@ body
     left: 0;
     outline: none;
 }
+
+img {
+    position: absolute;
+    width: 10rem;
+    margin: 2rem;
+}
+
+.bar {
+    display: absolute;
+    width: 2.3rem;
+    height: 0.18rem;
+    margin: 0.31rem auto;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    background-color: #ffffff;
+}
+
+.hamburger {
+        display: block;
+        cursor: pointer;
+    }

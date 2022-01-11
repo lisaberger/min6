@@ -1,6 +1,7 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import * as dat from 'lil-gui'
 
 
@@ -21,7 +22,8 @@ const scene = new THREE.Scene()
  */
 const textureLoader = new THREE.TextureLoader()
 const matcapTexture = textureLoader.load('/textures/matcaps/7.png')
-const goldTexture = textureLoader.load('/textur_test.jpg')
+// const goldTexture = textureLoader.load('/textur_test.png')
+const goldTexture = textureLoader.load('/textures_elements_2.svg')
 
 /**
  * Object
@@ -38,7 +40,9 @@ const goldTexture = textureLoader.load('/textur_test.jpg')
 //     matcap: matcapTexture,
 // })
 
-const geometry = new THREE.BoxGeometry(1, 1, 1)
+// const planeGeometry = new THREE.PlaneGeometry(1,1)
+// const geometry = new THREE.BoxGeometry(1, 1, 1)
+const geometry = new RoundedBoxGeometry(1, 1, 1, 10, 0.1)
 
 // function createCubeMatrix(m, n, v, offset) {
 //     offset = offset !== undefined ? offset : 2.0;
@@ -76,29 +80,52 @@ for ( let i = 0; i < 118; i++ ) {
 		objects.push( objectbox );
 }
 
+const textures = []
+
+for(let i = 0; i < 118; i++) {
+    textures[i] = textureLoader.load('/textures/elements/textures_elements_'+ i + '.png')
+}
+// console.log(textures)
+
 
 const vector = new THREE.Vector3();
 
 // Helix
 for ( let i = 0; i < objects.length; i++ ) {
 
-    const theta = i * 0.175 + Math.PI; //default  0.175
-    const y = - ( i * 0.05 ) + 2;
+    const theta = i * 0.2 + Math.PI; //default  0.175
+    const y = - ( i * 0.05 ) + 3;
 
     // const edges = new THREE.EdgesGeometry( geometry );
     // const object = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xff9900 } ) );
-    const object = new THREE.Mesh(geometry, new THREE.MeshMatcapMaterial({
-            matcap: matcapTexture,
-            map: goldTexture
+    // const plane = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial(
+    //     {map: goldTexture,
+    //     transparent: true,
+    //     side: THREE.DoubleSide
+    // }
+    // ))
+
+    const object = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
+            // color: 0xFFFFFF,
+            map: textures[i],
+            fog: true,
+            // map: goldTexture,
+            // transparent: true,
+            // opacity: 0.99,
+            // alpha: true,
+            // side: THREE.DoubleSide
         }))
+    // plane.position.setFromCylindricalCoords(8, theta, y)
     object.position.setFromCylindricalCoords( 8, theta, y );
 
     vector.x = object.position.x * 2;
     vector.y = object.position.y;
     vector.z = object.position.z * 2;
 
+    // plane.lookAt (vector)
     object.lookAt( vector );
 
+    // targets.helix.push(plane)
     targets.helix.push( object );
 }
 
@@ -145,23 +172,33 @@ window.addEventListener('resize', () =>
 /**
  * Lights
  */
-const directionalLight1 = new THREE.DirectionalLight({
-    color: 'white',
-    intensity: 1
-})
-directionalLight1.position.y = 5;
-directionalLight1.position.x = 2;
-directionalLight1.position.z = -3;
-scene.add(directionalLight1)
+const ambientLight = new THREE.AmbientLight(0xcc9ff4, 1);
+scene.add(ambientLight)
 
-const directionalLight2 = new THREE.DirectionalLight({
-    color: 'white',
-    intensity: 2
-})
-directionalLight2.position.y = 3;
-directionalLight2.position.x = -3;
-directionalLight2.position.z = 3;
-scene.add(directionalLight2)
+// const hemisphereLight = new THREE.HemisphereLight(
+//     new THREE.Color(0xfff),
+//     new THREE.Color(0xccc),
+//     1.0
+// )
+// scene.add(hemisphereLight)
+
+// const directionalLight1 = new THREE.DirectionalLight({
+//     color: 'white',
+//     intensity: 1
+// })
+// directionalLight1.position.y = 5;
+// directionalLight1.position.x = 2;
+// directionalLight1.position.z = -3;
+// scene.add(directionalLight1)
+
+// const directionalLight2 = new THREE.DirectionalLight({
+//     color: 'white',
+//     intensity: 2
+// })
+// directionalLight2.position.y = 3;
+// directionalLight2.position.x = -3;
+// directionalLight2.position.z = 3;
+// scene.add(directionalLight2)
 
 /**
  * Mouse 
@@ -174,6 +211,7 @@ scene.add(directionalLight2)
      mouse.y = -(event.clientY / sizes.height) * 2 + 1 // Values from -1 to 1 -> normalized
  })
 
+
 /**
  * Camera
  */
@@ -181,7 +219,7 @@ scene.add(directionalLight2)
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 500)
 // camera.position.x = 1
 // camera.position.y = 1
-camera.position.z = 20
+camera.position.z = 14
 scene.add(camera)
 
 // Controls
@@ -199,6 +237,16 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 /**
+ * Gridhelper
+ */
+const gridhelper = new THREE.GridHelper(100, 10, 0xffffff)
+scene.add(gridhelper)
+
+
+    const fog = new THREE.Fog(0x000000, 1, 10);
+    scene.add(fog);
+
+/**
  * Animate
  */
 const clock = new THREE.Clock()
@@ -214,12 +262,11 @@ const tick = () =>
     const intersects = raycaster.intersectObjects(objectsToTest)
 
     for(const object of objectsToTest) {
-        object.material.color.set('#00ff00')
+        object.material.color.set('#FFF')
     }
 
     for(const intersect of intersects) {
-        intersect.object.material.color.set('#005500')
-
+        intersect.object.material.color.set('#AAAAAA')
     }
 
     // Update controls
