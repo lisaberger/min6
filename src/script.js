@@ -108,7 +108,7 @@ for ( let i = 0; i < objects.length; i++ ) {
     const object = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
             // color: 0xFFFFFF,
             map: textures[i],
-            fog: true,
+            // fog: true,
             // map: goldTexture,
             // transparent: true,
             // opacity: 0.99,
